@@ -14,7 +14,7 @@ public class SMTPClient {
         PrintWriter sockOut = null;
         BufferedReader sockIn = null;
 
-        //Prompt for Host
+        // Prompt for Host
         while (true) {
             System.out.println("Enter Host:");
             host = userIn.readLine();
@@ -25,7 +25,7 @@ public class SMTPClient {
             System.out.println("Invalid Input!\n");
         }
 
-        //Establish connection
+        // Establish connection
         try {
             long attConnect = System.currentTimeMillis();
             sock = new Socket(host, 5090);
@@ -40,10 +40,12 @@ public class SMTPClient {
             System.err.println("I/O Error: " + host);
             System.exit(1);
         }
+        String servConnect = sockIn.readLine();
+        System.out.println(servConnect);
 
         while (true) {
 
-            //Collect info
+            // Collect info
             System.out.print("\nEnter Sender's Email: ");
             String sender = userIn.readLine().toUpperCase();
             String[] parse = sender.split("@");
@@ -55,18 +57,27 @@ public class SMTPClient {
             System.out.print("\nEnter Content: ");
             String content = userIn.readLine();
 
-            //Compose & Send HELO
-            String helo = "HELO " + domain;
-            long helloSent = System.currentTimeMillis();
-            sockOut.print(helo);
-            sockOut.flush();
+            while (true) {
+                // Compose & Send HELO
+                String helo = "HELO " + domain;
+                long helloSent = System.currentTimeMillis();
+                sockOut.print(helo);
+                sockOut.flush();
 
-            // Receive Server "Hello"
-            String servHello = sockIn.readLine();
-            long helloRec = System.currentTimeMillis();
-            System.out.println(servHello);
-            System.out.println("RRT (HELO): " + (helloSent - helloRec) + " ms");
+                // Receive Server "Hello"
+                String servHello = sockIn.readLine();
+                long helloRec = System.currentTimeMillis();
+                if (servHello.contains("250")) {
+                    System.out.println(servHello);
+                    System.out.println("RTT (HELO): " + (helloSent - helloRec) + " ms");
+                    break;
+                } else {
+                    System.out.println(servHello);
+                }
+            }
 
+            /*** Implement while() loops ***/
+            /*
             // Compose & Send MAIL FROM
             String from = "MAIL FROM: " + sender;
             long fromSent = System.currentTimeMillis();
@@ -90,12 +101,14 @@ public class SMTPClient {
             long rcptOkRec = System.currentTimeMillis();
             System.out.println(rcptOk);
             System.out.println("RTT (RCPT TO): " + (rcptSent - rcptOkRec) + " ms");
+*/
 
-            
 
             // Prompt to continue
             System.out.print("\nContinue? ('QUIT' to exit): ");
             if ((userIn.readLine()).equalsIgnoreCase("QUIT")) {
+                sockOut.print("QUIT");
+                sockOut.flush();
                 sockOut.close();
                 sockIn.close();
                 userIn.close();

@@ -14,62 +14,40 @@ public class SMTPThread {
         cSock = sock;
     }
 
-    //Start thread
+    // Start thread
     public void run() {
 
-        //Intialize streams and variables
+        // Initialize streams and variables
         try {
             PrintWriter cSockOut = new PrintWriter(
                     cSock.getOutputStream(), true);
             BufferedReader cSockIn = new BufferedReader(
                     new InputStreamReader(cSock.getInputStream()));
-            String fromClient,request,fileName,status,date,toClient;
-            String server = "Server:\swww.msudenver.edu\r\n";
-
+            String dns = "cs3700a.msudenver.edu";
+            String connected = "220 " + dns;
+            cSockOut.print(connected);
+            cSockOut.flush();
+            String fromClient;
             //Receive HTTP request and response until client closes
             while ((fromClient = cSockIn.readLine()) != null) {
-                request = fromClient + "\r\n" + cSockIn.readLine() + "\r\n" +
-                        cSockIn.readLine() + "\r\n" + cSockIn.readLine();
-                System.out.println(request);
-
-                //Parse HTTP request for method and filename, set status
-                String[] header = request.split("\r\n");
-                String[] firstLine = header[0].split("\s");
-                fileName = firstLine[1];
-                StringBuilder sb = new StringBuilder(fileName);
-                fileName = (sb.delete(0,1)).toString();
-                Path path = Paths.get(fileName);
-                if (firstLine[0].contains("GET") && Files.exists(path)) {
-                    status = "200:\sOK\r\n";
-                } else if (header[0].contains("GET") && !Files.exists(path)) {
-                    status = "400:\sFile\sNot\sFound\r\n";
-                } else {
-                    status = "404:\sBad\sRequest\r\n";
+                while (true) {
+                    String hello = fromClient;
+                    String[] parse = hello.split("\s");
+                    String host = parse[1];
+                    String helloOk = "250 " + dns + " hello " + host;
+                    String helloErr = "503 5.5.2 Send hello first";
+                    if (hello.contains("HELO")) {
+                        cSockOut.print(helloOk);
+                        cSockOut.flush();
+                        break;
+                    } else {
+                        cSockOut.print(helloErr);
+                        cSockOut.flush();
+                    }
                 }
-
-                //Compose HTTP response, send to client
-                DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
-                Date currentDate = new Date();
-                date = dateFormat.format(currentDate) + "\r\n";
-                toClient = status + date + server + "\r\n\r\n";
-                cSockOut.print(toClient);
-                cSockOut.flush();
-
-                //Send file to client if status = 200
-                if (status.equals("200:\sOK\r\n")) {
-                    BufferedReader fileIn = new BufferedReader(new FileReader(fileName));
-                    char[] buffer = new char[4096];
-                    int chars = fileIn.read(buffer,0,buffer.length);
-                    cSockOut.write(buffer,0,chars);
-                    String end = "\r\n\r\n\r\n\r\n";
-                    char[] endLines = end.toCharArray();
-                    cSockOut.write(endLines,0, endLines.length);
-                    cSockOut.flush();
-                    fileIn.close();
-                }
-
-                //Close connection if client inputs "N"
-                if ((cSockIn.readLine()).equalsIgnoreCase("N")) {
+                System.out.println("End hello loop");
+                //Close connection if client inputs "QUIT"
+                if ((cSockIn.readLine()).equalsIgnoreCase("QUIT")) {
                     break;
                 }
             }
