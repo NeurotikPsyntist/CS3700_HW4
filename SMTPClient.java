@@ -7,6 +7,8 @@ import java.net.UnknownHostException;
 
 public class SMTPClient {
     public static void main(String[] args) throws IOException {
+        // Change to personal port, check server program too
+        int port = 5090; // 5160 5090
 
         BufferedReader userIn = new BufferedReader(new InputStreamReader(System.in));
         String host;
@@ -28,7 +30,7 @@ public class SMTPClient {
         // Establish connection
         try {
             long attConnect = System.currentTimeMillis();
-            sock = new Socket(host, 5090);
+            sock = new Socket(host, port);
             sockOut = new PrintWriter(sock.getOutputStream(), true);
             sockIn = new BufferedReader(new InputStreamReader(sock.getInputStream()));
             long estConnect = System.currentTimeMillis();
@@ -40,6 +42,7 @@ public class SMTPClient {
             System.err.println("I/O Error: " + host);
             System.exit(1);
         }
+
         String servConnect = sockIn.readLine();
         System.out.println(servConnect);
 

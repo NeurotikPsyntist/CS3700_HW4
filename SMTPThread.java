@@ -7,10 +7,10 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class SMTPThread {
+public class SMTPThread extends Thread {
     private Socket cSock = null;
     public SMTPThread(Socket sock) {
-        super();
+        super("SMTPThread");
         cSock = sock;
     }
 
