@@ -61,13 +61,16 @@ public class SMTPClient {
             String content = userIn.readLine();
 
             while (true) {
+
                 // Compose & Send HELO
+
                 String helo = "HELO " + domain;
                 long helloSent = System.currentTimeMillis();
                 sockOut.print(helo);
                 sockOut.flush();
 
                 // Receive Server "Hello"
+
                 String servHello = sockIn.readLine();
                 long helloRec = System.currentTimeMillis();
                 if (servHello.contains("250")) {
@@ -80,32 +83,57 @@ public class SMTPClient {
             }
 
             /*** Implement while() loops ***/
-            /*
-            // Compose & Send MAIL FROM
-            String from = "MAIL FROM: " + sender;
-            long fromSent = System.currentTimeMillis();
-            sockOut.print(from);
-            sockOut.flush();
 
+            while (true) {
+
+                // Compose & Send MAIL FROM
+
+                String from = "MAIL FROM: " + sender;
+                long fromSent = System.currentTimeMillis();
+                sockOut.print(from);
+                sockOut.flush();
+
+                // Recieve Server MAIL FROM
+
+                String servFrom = sockIn.readLine();
+                long fromRec = System.currentTimeMillis();
+                if (servFrom.contains("250")) {
+                    System.out.println(servFrom);
+                    System.out.println("RTT (MAIL FROM): " + (fromSent - fromRec) + " ms");
+                    break;
+                } else {
+                    System.out.println(servFrom);
+                }
+
+            }
+        /*
             // Receive Server "Sender OK"
             String servSendOk = sockIn.readLine();
             long sendOkRec = System.currentTimeMillis();
             System.out.println(servSendOk);
             System.out.println("RTT (MAIL FROM): " + (fromSent - sendOkRec) + " ms");
 
-            // Compose & Send RCPT TO
-            String to = "RCPT TO: " + receiver;
-            long rcptSent = System.currentTimeMillis();
-            sockOut.print(to);
-            sockOut.flush();
+         */
+            while (true) {
 
-            // Receive Server "Recipient OK"
-            String rcptOk = sockIn.readLine();
-            long rcptOkRec = System.currentTimeMillis();
-            System.out.println(rcptOk);
-            System.out.println("RTT (RCPT TO): " + (rcptSent - rcptOkRec) + " ms");
-*/
+                // Compose & Send RCPT TO
+                String to = "RCPT TO: " + receiver;
+                long rcptSent = System.currentTimeMillis();
+                sockOut.print(to);
+                sockOut.flush();
 
+                // Receive Server "Recipient OK"
+                String rcptOk = sockIn.readLine();
+                long rcptOkRec = System.currentTimeMillis();
+                if (rcptOk.contains("250")) {
+                    System.out.println(rcptOk);
+                    System.out.println("RTT (RCPT TO): " + (rcptSent - rcptOkRec));
+                    break;
+                } else {
+                    System.out.println(rcptOk);
+                }
+
+            }
 
             // Prompt to continue
             System.out.print("\nContinue? ('QUIT' to exit): ");
