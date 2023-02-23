@@ -50,7 +50,7 @@ public class SMTPClient {
 
             // Collect info
             System.out.print("\nEnter Sender's Email: ");
-            String sender = userIn.readLine().toUpperCase();
+            String sender = userIn.readLine();
             String[] parse = sender.split("@");
             String domain = parse[1];
             System.out.print("\nEnter Receiver's Email: ");
