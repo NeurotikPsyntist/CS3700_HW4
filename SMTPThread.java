@@ -8,7 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class SMTPThread extends Thread {
-    private Socket cSock = null;
+    private Socket cSock;
     public SMTPThread(Socket sock) {
         super("SMTPThread");
         cSock = sock;
@@ -24,7 +24,6 @@ public class SMTPThread extends Thread {
             BufferedReader cSockIn = new BufferedReader(
                     new InputStreamReader(cSock.getInputStream()));
             String host = "cs3700a.msudenver.edu";
-            String client = String.valueOf(cSock.getInetAddress());
             String connected = "220 " + host;
             cSockOut.println(connected);
             cSockOut.flush();
@@ -35,10 +34,9 @@ public class SMTPThread extends Thread {
 
                 // Receive & Verify HELO
                 while (true) {
-                    String helo = fromClient;
-                    System.out.println(helo);
-                    if (helo.contains("HELO")) {
-                        String[] parse = helo.split("\s");
+                    System.out.println(fromClient);
+                    if (fromClient.contains("HELO")) {
+                        String[] parse = fromClient.split("\s");
                         String domain = parse[1];
                         String heloOk = "250 " + host + " hello " + domain;
                         cSockOut.println(heloOk);
@@ -111,5 +109,4 @@ public class SMTPThread extends Thread {
             e.printStackTrace();
         }
     }
-
 }
