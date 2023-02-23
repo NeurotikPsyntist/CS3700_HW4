@@ -38,7 +38,7 @@ public class SMTPThread extends Thread {
                     String hello = fromClient;
                     if (hello.contains("HELO")) {
                         String[] parse = hello.split("\s");
-                        String domain = parse[1];
+                        String domain = parse[1].toLowerCase();
                         String helloOk = "250 " + host + " hello " + domain;
                         cSockOut.println(helloOk);
                         cSockOut.flush();

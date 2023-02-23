@@ -33,7 +33,7 @@ public class SMTPClient {
             sock = new Socket(host, port);
             sockOut = new PrintWriter(sock.getOutputStream(), true);
             sockIn = new BufferedReader(new InputStreamReader(sock.getInputStream()));
-            long connectRTT = attConnect - System.currentTimeMillis();
+            long connectRTT = System.currentTimeMillis() - attConnect;
             System.out.println("RTT(connection): " + connectRTT + " ms");
         } catch (UnknownHostException e) {
             System.err.println("Unknown Host: " + host);
@@ -68,7 +68,7 @@ public class SMTPClient {
 
             // Receive Server "Hello"
             String servHello = sockIn.readLine();
-            long heloRTT = heloSent - System.currentTimeMillis();
+            long heloRTT = System.currentTimeMillis() - heloSent;
             System.out.println(servHello);
             System.out.println("RTT (HELO): " + heloRTT + " ms");
 
@@ -80,7 +80,7 @@ public class SMTPClient {
 
             // Receive Server "Sender OK"
             String servFrom = sockIn.readLine();
-            long fromRTT = fromSent - System.currentTimeMillis();
+            long fromRTT = System.currentTimeMillis() - fromSent;
             System.out.println(servFrom);
             System.out.println("RTT (MAIL FROM): " + fromRTT + " ms");
 
@@ -92,7 +92,7 @@ public class SMTPClient {
 
             // Receive Server "Recipient OK"
             String rcptOk = sockIn.readLine();
-            long rcptRTT = rcptSent - System.currentTimeMillis();
+            long rcptRTT = System.currentTimeMillis() - rcptSent;
             System.out.println(rcptOk);
             System.out.println("RTT (RCPT TO): " + rcptRTT + " ms");
 
@@ -104,7 +104,7 @@ public class SMTPClient {
 
             // Receive Server "Start mail input"
             String startMail = sockIn.readLine();
-            long dataRTT = dataSent - System.currentTimeMillis();
+            long dataRTT = System.currentTimeMillis() - dataSent;
             System.out.println(startMail);
             System.out.println("RTT (DATA): " + dataRTT + " ms");
 
