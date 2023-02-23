@@ -18,7 +18,7 @@ public class SMTPClient {
 
         // Prompt for Host
         while (true) {
-            System.out.println("Enter Host:");
+            System.out.println("Enter Host Name of SMTP Server:");
             host = userIn.readLine();
             if (host.length() >= 1) {
                 System.out.println("\nYou entered " + host + "\n");
@@ -33,8 +33,8 @@ public class SMTPClient {
             sock = new Socket(host, port);
             sockOut = new PrintWriter(sock.getOutputStream(), true);
             sockIn = new BufferedReader(new InputStreamReader(sock.getInputStream()));
-            long estConnect = System.currentTimeMillis();
-            System.out.println("RTT(connection): " + (estConnect - attConnect) + " ms");
+            long connectRTT = attConnect - System.currentTimeMillis();
+            System.out.println("RTT(connection): " + connectRTT + " ms");
         } catch (UnknownHostException e) {
             System.err.println("Unknown Host: " + host);
             System.exit(1);
@@ -43,8 +43,8 @@ public class SMTPClient {
             System.exit(1);
         }
 
-        String servConnect = sockIn.readLine();
-        System.out.println(servConnect);
+        String connected = sockIn.readLine();
+        System.out.println(connected);
 
         while (true) {
 
@@ -60,85 +60,58 @@ public class SMTPClient {
             System.out.print("\nEnter Content: ");
             String content = userIn.readLine();
 
-            while (true) {
+            // Compose & Send HELO
+            String helo = "HELO " + domain;
+            long heloSent = System.currentTimeMillis();
+            sockOut.println(helo);
+            sockOut.flush();
 
-                // Compose & Send HELO
+            // Receive Server "Hello"
+            String servHello = sockIn.readLine();
+            long heloRTT = heloSent - System.currentTimeMillis();
+            System.out.println(servHello);
+            System.out.println("RTT (HELO): " + heloRTT + " ms");
 
-                String helo = "HELO " + domain;
-                long helloSent = System.currentTimeMillis();
-                sockOut.print(helo);
-                sockOut.flush();
+            // Compose & Send MAIL FROM
+            String from = "MAIL FROM: " + sender;
+            long fromSent = System.currentTimeMillis();
+            sockOut.println(from);
+            sockOut.flush();
 
-                // Receive Server "Hello"
-
-                String servHello = sockIn.readLine();
-                long helloRec = System.currentTimeMillis();
-                if (servHello.contains("250")) {
-                    System.out.println(servHello);
-                    System.out.println("RTT (HELO): " + (helloSent - helloRec) + " ms");
-                    break;
-                } else {
-                    System.out.println(servHello);
-                }
-            }
-
-            /*** Implement while() loops ***/
-
-            while (true) {
-
-                // Compose & Send MAIL FROM
-
-                String from = "MAIL FROM: " + sender;
-                long fromSent = System.currentTimeMillis();
-                sockOut.print(from);
-                sockOut.flush();
-
-                // Recieve Server MAIL FROM
-
-                String servFrom = sockIn.readLine();
-                long fromRec = System.currentTimeMillis();
-                if (servFrom.contains("250")) {
-                    System.out.println(servFrom);
-                    System.out.println("RTT (MAIL FROM): " + (fromSent - fromRec) + " ms");
-                    break;
-                } else {
-                    System.out.println(servFrom);
-                }
-
-            }
-        /*
             // Receive Server "Sender OK"
-            String servSendOk = sockIn.readLine();
-            long sendOkRec = System.currentTimeMillis();
-            System.out.println(servSendOk);
-            System.out.println("RTT (MAIL FROM): " + (fromSent - sendOkRec) + " ms");
+            String servFrom = sockIn.readLine();
+            long fromRTT = fromSent - System.currentTimeMillis();
+            System.out.println(servFrom);
+            System.out.println("RTT (MAIL FROM): " + fromRTT + " ms");
 
-         */
-            while (true) {
+            // Compose & Send RCPT TO
+            String to = "RCPT TO: " + receiver;
+            long rcptSent = System.currentTimeMillis();
+            sockOut.println(to);
+            sockOut.flush();
 
-                // Compose & Send RCPT TO
-                String to = "RCPT TO: " + receiver;
-                long rcptSent = System.currentTimeMillis();
-                sockOut.print(to);
-                sockOut.flush();
+            // Receive Server "Recipient OK"
+            String rcptOk = sockIn.readLine();
+            long rcptRTT = rcptSent - System.currentTimeMillis();
+            System.out.println(rcptOk);
+            System.out.println("RTT (RCPT TO): " + rcptRTT + " ms");
 
-                // Receive Server "Recipient OK"
-                String rcptOk = sockIn.readLine();
-                long rcptOkRec = System.currentTimeMillis();
-                if (rcptOk.contains("250")) {
-                    System.out.println(rcptOk);
-                    System.out.println("RTT (RCPT TO): " + (rcptSent - rcptOkRec));
-                    break;
-                } else {
-                    System.out.println(rcptOk);
-                }
+            // Compose & Send DATA
+            String data = "DATA";
+            long dataSent = System.currentTimeMillis();
+            sockOut.println(data);
+            sockOut.flush();
 
-            }
+            // Receive Server "Start mail input"
+            String startMail = sockIn.readLine();
+            long dataRTT = dataSent - System.currentTimeMillis();
+            System.out.println(startMail);
+            System.out.println("RTT (DATA): " + dataRTT + " ms");
 
             // Prompt to continue
             System.out.print("\nContinue? ('QUIT' to exit): ");
             if ((userIn.readLine()).equalsIgnoreCase("QUIT")) {
-                sockOut.print("QUIT");
+                sockOut.println("QUIT");
                 sockOut.flush();
                 sockOut.close();
                 sockIn.close();
