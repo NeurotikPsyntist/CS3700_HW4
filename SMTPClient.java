@@ -131,6 +131,8 @@ public class SMTPClient {
             System.out.print("\nContinue? ('QUIT' to exit): ");
             if ((userIn.readLine()).equalsIgnoreCase("QUIT")) {
                 sockOut.println("QUIT");
+                String closeConnect = sockIn.readLine();
+                System.out.println(closeConnect);
                 sockOut.flush();
                 sockOut.close();
                 sockIn.close();

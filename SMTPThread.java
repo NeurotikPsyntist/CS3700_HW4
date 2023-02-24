@@ -1,4 +1,5 @@
 import java.io.*;
+import java.net.Inet4Address;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,7 +27,6 @@ public class SMTPThread extends Thread {
             String host = "cs3700a.msudenver.edu";
             String connected = "220 " + host;
             cSockOut.println(connected);
-            String fromClient;
 
             boolean quit = false;
             boolean heloLoop = true;
@@ -119,6 +119,8 @@ public class SMTPThread extends Thread {
                 //Close connection if client inputs "QUIT"
                 if ((cSockIn.readLine()).equalsIgnoreCase("QUIT"))
                     quit = true;
+                    String closingTime = "221 " + cSock.getLocalAddress() + " closing connection";
+                    cSockOut.println(closingTime);
             }
             cSockOut.close();
             cSockIn.close();
