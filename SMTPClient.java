@@ -46,6 +46,8 @@ public class SMTPClient {
         String connected = sockIn.readLine();
         System.out.println(connected);
 
+        boolean moreContent = true;
+
         while (true) {
 
             // Collect info
@@ -59,7 +61,6 @@ public class SMTPClient {
             String subject = userIn.readLine();
             System.out.print("\nEnter Content (enter \".\" on a new line when finished): \n");
             String content = "";
-            boolean moreContent = true;
             while (moreContent){
                 String newContent = userIn.readLine();
                 content = content + newContent + "\r\n";
@@ -117,10 +118,10 @@ public class SMTPClient {
 
             // Compose & Send Message
             long contentSent = System.currentTimeMillis();
-            sockOut.println("To: " + receiver +
+            sockOut.print("To: " + receiver +
                         "\r\nFrom: " + sender +
                         "\r\nSubject: " + subject +
-                        "\r\n" + content);
+                        "\r\n" + content + "\r\n");
             sockOut.flush();
 
             // Receive Server Message Sent
@@ -137,6 +138,8 @@ public class SMTPClient {
                 String closeConnect = sockIn.readLine();
                 System.out.println(closeConnect);
                 break;
+            } else {
+                moreContent = true;
             }
         }
         sockOut.close();

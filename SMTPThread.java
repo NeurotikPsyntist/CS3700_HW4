@@ -27,19 +27,19 @@ public class SMTPThread extends Thread {
             String host = "cs3700a.msudenver.edu";
             String connected = "220 " + host;
             cSockOut.println(connected);
-        /*
+
             boolean heloLoop = true;
             boolean mailLoop = true;
             boolean rcptLoop = true;
             boolean dataLoop = true;
             boolean msgLoop = true;
-            */
+
 
             // Receive SMTP Requests & Send Responses
             while (true) {
 
                 // Receive & Verify HELO
-                while (true) {
+                while (heloLoop) {
                     String heloUser = cSockIn.readLine();
                     System.out.println(heloUser);
                     if (heloUser.startsWith("HELO")) {
@@ -48,7 +48,7 @@ public class SMTPThread extends Thread {
                         String heloOk = "250 " + host + " hello " + domain;
                         cSockOut.println(heloOk);
                         cSockOut.flush();
-                        break;
+                        heloLoop = false;
                     } else {
                         String heloErr = "503 5.5.2 Send hello first";
                         cSockOut.println(heloErr);
@@ -57,14 +57,14 @@ public class SMTPThread extends Thread {
                 }
 
                 // Receive & Verify MAIL FROM
-                while (true) {
+                while (mailLoop) {
                     String mailFrom = cSockIn.readLine();
                     System.out.println(mailFrom);
                     if (mailFrom.startsWith("MAIL FROM:")) {
                         String senderOk = "250 2.1.0 Sender OK";
                         cSockOut.println(senderOk);
                         cSockOut.flush();
-                        break;
+                        mailLoop = false;
                     } else {
                         String senderErr = "503 5.5.2 Need mail command";
                         cSockOut.println(senderErr);
@@ -73,14 +73,14 @@ public class SMTPThread extends Thread {
                 }
 
                 // Receive & Verify RCPT TO
-                while (true) {
+                while (rcptLoop) {
                     String rcptTo = cSockIn.readLine();
                     System.out.println(rcptTo);
                     if (rcptTo.startsWith("RCPT TO:")) {
                         String rcptOk = "250 2.1.5 Recipient OK";
                         cSockOut.println(rcptOk);
                         cSockOut.flush();
-                        break;
+                        rcptLoop = false;
                     } else {
                         String rcptErr = "503 5.5.2 Need rcpt command";
                         cSockOut.println(rcptErr);
@@ -89,14 +89,14 @@ public class SMTPThread extends Thread {
                 }
 
                 // Receive & Verify DATA
-                while (true) {
+                while (dataLoop) {
                     String data = cSockIn.readLine();
                     System.out.println(data);
                     if (data.startsWith("DATA")) {
                         String dataOk = "354 Start mail input; end with <CRLF>.<CRLF>";
                         cSockOut.println(dataOk);
                         cSockOut.flush();
-                        break;
+                        dataLoop = false;
                     } else {
                         String dataErr = "503 5.5.2 Need data command";
                         cSockOut.println(dataErr);
@@ -105,14 +105,14 @@ public class SMTPThread extends Thread {
                 }
 
                 // Receive MAIL message
-                while (true) {
+                while (msgLoop) {
                     String msg = cSockIn.readLine();
                     System.out.println(msg);
                     if (msg.equals(".")) {
                         String msgOk = "250 Message received and to be delivered";
                         cSockOut.println(msgOk);
                         cSockOut.flush();
-                        break;
+                        msgLoop = false;
                     }
                 }
 
@@ -124,6 +124,12 @@ public class SMTPThread extends Thread {
                     cSockOut.println(closingTime);
                     cSockOut.flush();
                     break;
+                } else {
+                    heloLoop = true;
+                    mailLoop = true;
+                    rcptLoop = true;
+                    dataLoop = true;
+                    msgLoop = true;
                 }
             }
             cSockOut.close();
