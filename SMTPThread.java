@@ -85,6 +85,8 @@ public class SMTPThread extends Thread {
                     }
                 }
 
+                rcptLoop = true;
+
                 // Receive & Verify DATA
                 while (dataLoop) {
                     String data = cSockIn.readLine();
