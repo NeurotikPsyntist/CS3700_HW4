@@ -4,7 +4,7 @@ import java.net.*;
 public class SMTPServer {
     public static void main(String[] args) throws IOException {
         // Change to personal port, check client program too
-        int port = 5090; // 5160 5090
+        int port = 5160; // 5160 5090
 
         ServerSocket sSock = null;
         boolean listening = true;
