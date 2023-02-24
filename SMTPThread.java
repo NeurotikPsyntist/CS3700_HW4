@@ -27,18 +27,19 @@ public class SMTPThread extends Thread {
             String host = "cs3700a.msudenver.edu";
             String connected = "220 " + host;
             cSockOut.println(connected);
-
-            boolean quit = false;
+        /*
             boolean heloLoop = true;
             boolean mailLoop = true;
             boolean rcptLoop = true;
             boolean dataLoop = true;
             boolean msgLoop = true;
+            */
 
             // Receive SMTP Requests & Send Responses
-            while(!quit) {
+            while (true) {
+
                 // Receive & Verify HELO
-                while (heloLoop) {
+                while (true) {
                     String heloUser = cSockIn.readLine();
                     System.out.println(heloUser);
                     if (heloUser.startsWith("HELO")) {
@@ -46,81 +47,84 @@ public class SMTPThread extends Thread {
                         String domain = parse[1];
                         String heloOk = "250 " + host + " hello " + domain;
                         cSockOut.println(heloOk);
-                        heloLoop = false;
+                        cSockOut.flush();
+                        break;
                     } else {
                         String heloErr = "503 5.5.2 Send hello first";
                         cSockOut.println(heloErr);
+                        cSockOut.flush();
                     }
                 }
 
-                heloLoop = true;
-
                 // Receive & Verify MAIL FROM
-                while (mailLoop) {
+                while (true) {
                     String mailFrom = cSockIn.readLine();
                     System.out.println(mailFrom);
                     if (mailFrom.startsWith("MAIL FROM:")) {
                         String senderOk = "250 2.1.0 Sender OK";
                         cSockOut.println(senderOk);
-                        mailLoop = false;
+                        cSockOut.flush();
+                        break;
                     } else {
                         String senderErr = "503 5.5.2 Need mail command";
                         cSockOut.println(senderErr);
+                        cSockOut.flush();
                     }
                 }
 
-                mailLoop = true;
-
                 // Receive & Verify RCPT TO
-                while (rcptLoop) {
+                while (true) {
                     String rcptTo = cSockIn.readLine();
                     System.out.println(rcptTo);
                     if (rcptTo.startsWith("RCPT TO:")) {
                         String rcptOk = "250 2.1.5 Recipient OK";
                         cSockOut.println(rcptOk);
-                        rcptLoop = false;
+                        cSockOut.flush();
+                        break;
                     } else {
                         String rcptErr = "503 5.5.2 Need rcpt command";
                         cSockOut.println(rcptErr);
+                        cSockOut.flush();
                     }
                 }
 
-                rcptLoop = true;
-
                 // Receive & Verify DATA
-                while (dataLoop) {
+                while (true) {
                     String data = cSockIn.readLine();
                     System.out.println(data);
                     if (data.startsWith("DATA")) {
                         String dataOk = "354 Start mail input; end with <CRLF>.<CRLF>";
                         cSockOut.println(dataOk);
-                        dataLoop = false;
+                        cSockOut.flush();
+                        break;
                     } else {
                         String dataErr = "503 5.5.2 Need data command";
                         cSockOut.println(dataErr);
+                        cSockOut.flush();
                     }
                 }
-
-                dataLoop = true;
 
                 // Receive MAIL message
-                while(msgLoop) {
+                while (true) {
                     String msg = cSockIn.readLine();
                     System.out.println(msg);
-                    if (msg.endsWith(".")) {
+                    if (msg.equals(".")) {
                         String msgOk = "250 Message received and to be delivered";
                         cSockOut.println(msgOk);
-                        msgLoop = false;
+                        cSockOut.flush();
+                        break;
                     }
                 }
 
-                msgLoop = true;
-
                 //Close connection if client inputs "QUIT"
-                if ((cSockIn.readLine()).equalsIgnoreCase("QUIT"))
-                    quit = true;
+                String userQuit;
+                if ((userQuit = cSockIn.readLine()).equals("QUIT")) {
+                    System.out.println("Client Quit");
                     String closingTime = "221 " + cSock.getLocalAddress() + " closing connection";
                     cSockOut.println(closingTime);
+                    cSockOut.flush();
+                    break;
+                }
             }
             cSockOut.close();
             cSockIn.close();

@@ -8,7 +8,7 @@ import java.net.UnknownHostException;
 public class SMTPClient {
     public static void main(String[] args) throws IOException {
         // Change to personal port, check server program too
-        int port = 5160; // 5160 5090
+        int port = 5090; // 5160 5090
 
         BufferedReader userIn = new BufferedReader(new InputStreamReader(System.in));
         String host;
@@ -71,6 +71,7 @@ public class SMTPClient {
             String helo = "HELO " + domain;
             long heloSent = System.currentTimeMillis();
             sockOut.println(helo);
+            sockOut.flush();
 
             // Receive Server "Hello"
             String servHello = sockIn.readLine();
@@ -82,6 +83,7 @@ public class SMTPClient {
             String from = "MAIL FROM: " + sender;
             long fromSent = System.currentTimeMillis();
             sockOut.println(from);
+            sockOut.flush();
 
             // Receive Server "Sender OK"
             String servFrom = sockIn.readLine();
@@ -93,6 +95,7 @@ public class SMTPClient {
             String to = "RCPT TO: " + receiver;
             long rcptSent = System.currentTimeMillis();
             sockOut.println(to);
+            sockOut.flush();
 
             // Receive Server "Recipient OK"
             String rcptOk = sockIn.readLine();
@@ -104,6 +107,7 @@ public class SMTPClient {
             String data = "DATA";
             long dataSent = System.currentTimeMillis();
             sockOut.println(data);
+            sockOut.flush();
 
             // Receive Server "Start mail input"
             String startMail = sockIn.readLine();
@@ -116,8 +120,8 @@ public class SMTPClient {
             sockOut.println("To: " + receiver +
                         "\r\nFrom: " + sender +
                         "\r\nSubject: " + subject +
-                        "\r\n" +
-                        content);
+                        "\r\n" + content);
+            sockOut.flush();
 
             // Receive Server Message Sent
             String msgOk = sockIn.readLine();
@@ -125,21 +129,19 @@ public class SMTPClient {
             System.out.println(msgOk);
             System.out.println("RTT (MSG SENT): " + contentRTT + " ms");
 
-
-
             // Prompt to continue
             System.out.print("\nContinue? ('QUIT' to exit): ");
             if ((userIn.readLine()).equalsIgnoreCase("QUIT")) {
                 sockOut.println("QUIT");
+                sockOut.flush();
                 String closeConnect = sockIn.readLine();
                 System.out.println(closeConnect);
-                sockOut.flush();
-                sockOut.close();
-                sockIn.close();
-                userIn.close();
-                sock.close();
                 break;
             }
         }
+        sockOut.close();
+        sockIn.close();
+        sock.close();
+        userIn.close();
     }
 }
