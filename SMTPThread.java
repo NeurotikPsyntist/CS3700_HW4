@@ -25,8 +25,9 @@ public class SMTPThread extends Thread {
             BufferedReader cSockIn = new BufferedReader(
                     new InputStreamReader(cSock.getInputStream()));
             String host = "cs3700a.msudenver.edu";
-            String connected = "220 " + host;
-            cSockOut.println(connected);
+            String connected = "220 " + host + "\r\n";
+            cSockOut.print(connected);
+            cSockOut.flush();
 
             boolean heloLoop = true;
             boolean mailLoop = true;
@@ -38,20 +39,31 @@ public class SMTPThread extends Thread {
             // Receive SMTP Requests & Send Responses
             while (true) {
 
+                String fromClient = cSockIn.readLine();
+                if (fromClient.equals("QUIT")) {
+                    System.out.println("Client Quit");
+                    String closingTime = "221 " + cSock.getLocalAddress() +
+                            " closing connection\r\n";
+                    cSockOut.print(closingTime);
+                    cSockOut.flush();
+                    break;
+                }
+
                 // Receive & Verify HELO
                 while (heloLoop) {
-                    String heloUser = cSockIn.readLine();
+                    String heloUser = fromClient;
                     System.out.println(heloUser);
                     if (heloUser.startsWith("HELO")) {
                         String[] parse = heloUser.split("\s");
                         String domain = parse[1];
-                        String heloOk = "250 " + host + " hello " + domain;
-                        cSockOut.println(heloOk);
+                        String heloOk = "250 " + host + " hello " +
+                                domain + "\r\n";
+                        cSockOut.print(heloOk);
                         cSockOut.flush();
                         heloLoop = false;
                     } else {
-                        String heloErr = "503 5.5.2 Send hello first";
-                        cSockOut.println(heloErr);
+                        String heloErr = "503 5.5.2 Send hello first\r\n";
+                        cSockOut.print(heloErr);
                         cSockOut.flush();
                     }
                 }
@@ -61,13 +73,13 @@ public class SMTPThread extends Thread {
                     String mailFrom = cSockIn.readLine();
                     System.out.println(mailFrom);
                     if (mailFrom.startsWith("MAIL FROM:")) {
-                        String senderOk = "250 2.1.0 Sender OK";
-                        cSockOut.println(senderOk);
+                        String senderOk = "250 2.1.0 Sender OK\r\n";
+                        cSockOut.print(senderOk);
                         cSockOut.flush();
                         mailLoop = false;
                     } else {
-                        String senderErr = "503 5.5.2 Need mail command";
-                        cSockOut.println(senderErr);
+                        String senderErr = "503 5.5.2 Need mail command\r\n";
+                        cSockOut.print(senderErr);
                         cSockOut.flush();
                     }
                 }
@@ -77,13 +89,13 @@ public class SMTPThread extends Thread {
                     String rcptTo = cSockIn.readLine();
                     System.out.println(rcptTo);
                     if (rcptTo.startsWith("RCPT TO:")) {
-                        String rcptOk = "250 2.1.5 Recipient OK";
-                        cSockOut.println(rcptOk);
+                        String rcptOk = "250 2.1.5 Recipient OK\r\n";
+                        cSockOut.print(rcptOk);
                         cSockOut.flush();
                         rcptLoop = false;
                     } else {
-                        String rcptErr = "503 5.5.2 Need rcpt command";
-                        cSockOut.println(rcptErr);
+                        String rcptErr = "503 5.5.2 Need rcpt command\r\n";
+                        cSockOut.print(rcptErr);
                         cSockOut.flush();
                     }
                 }
@@ -93,13 +105,13 @@ public class SMTPThread extends Thread {
                     String data = cSockIn.readLine();
                     System.out.println(data);
                     if (data.startsWith("DATA")) {
-                        String dataOk = "354 Start mail input; end with <CRLF>.<CRLF>";
-                        cSockOut.println(dataOk);
+                        String dataOk = "354 Start mail input; end with <CRLF>.<CRLF>\r\n";
+                        cSockOut.print(dataOk);
                         cSockOut.flush();
                         dataLoop = false;
                     } else {
-                        String dataErr = "503 5.5.2 Need data command";
-                        cSockOut.println(dataErr);
+                        String dataErr = "503 5.5.2 Need data command\r\n";
+                        cSockOut.print(dataErr);
                         cSockOut.flush();
                     }
                 }
@@ -109,8 +121,8 @@ public class SMTPThread extends Thread {
                     String msg = cSockIn.readLine();
                     System.out.println(msg);
                     if (msg.equals(".")) {
-                        String msgOk = "250 Message received and to be delivered";
-                        cSockOut.println(msgOk);
+                        String msgOk = "250 Message received and to be delivered\r\n";
+                        cSockOut.print(msgOk);
                         cSockOut.flush();
                         msgLoop = false;
                     }
@@ -118,10 +130,11 @@ public class SMTPThread extends Thread {
 
                 //Close connection if client inputs "QUIT"
                 String userQuit;
-                if ((userQuit = cSockIn.readLine()).equals("QUIT")) {
+                if ((userQuit = cSockIn.readLine()).equals("\r\nQUIT\r\n")) {
                     System.out.println("Client Quit");
-                    String closingTime = "221 " + cSock.getLocalAddress() + " closing connection";
-                    cSockOut.println(closingTime);
+                    String closingTime = "221 " + cSock.getLocalAddress() +
+                            " closing connection\r\n";
+                    cSockOut.print(closingTime);
                     cSockOut.flush();
                     break;
                 } else {

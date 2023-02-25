@@ -61,17 +61,17 @@ public class SMTPClient {
             String subject = userIn.readLine();
             System.out.print("\nEnter Content (enter \".\" on a new line when finished): \n");
             String content = "";
-            while (moreContent){
+            while (true){
                 String newContent = userIn.readLine();
-                content = content + newContent + "\r\n";
+                content = content + newContent +"\r\n";
                 if (newContent.equals("."))
-                    moreContent = false;
+                    break;
             }
 
             // Compose & Send HELO
-            String helo = "HELO " + domain;
+            String helo = "HELO " + domain + "\r\n";
             long heloSent = System.currentTimeMillis();
-            sockOut.println(helo);
+            sockOut.print(helo);
             sockOut.flush();
 
             // Receive Server "Hello"
@@ -81,9 +81,9 @@ public class SMTPClient {
             System.out.println("RTT (HELO): " + heloRTT + " ms");
 
             // Compose & Send MAIL FROM
-            String from = "MAIL FROM: " + sender;
+            String from = "MAIL FROM: " + sender + "\r\n";
             long fromSent = System.currentTimeMillis();
-            sockOut.println(from);
+            sockOut.print(from);
             sockOut.flush();
 
             // Receive Server "Sender OK"
@@ -93,9 +93,9 @@ public class SMTPClient {
             System.out.println("RTT (MAIL FROM): " + fromRTT + " ms");
 
             // Compose & Send RCPT TO
-            String to = "RCPT TO: " + receiver;
+            String to = "RCPT TO: " + receiver + "\r\n";
             long rcptSent = System.currentTimeMillis();
-            sockOut.println(to);
+            sockOut.print(to);
             sockOut.flush();
 
             // Receive Server "Recipient OK"
@@ -105,9 +105,9 @@ public class SMTPClient {
             System.out.println("RTT (RCPT TO): " + rcptRTT + " ms");
 
             // Compose & Send DATA
-            String data = "DATA";
+            String data = "DATA\r\n";
             long dataSent = System.currentTimeMillis();
-            sockOut.println(data);
+            sockOut.print(data);
             sockOut.flush();
 
             // Receive Server "Start mail input"
@@ -133,7 +133,7 @@ public class SMTPClient {
             // Prompt to continue
             System.out.print("\nContinue? ('QUIT' to exit): ");
             if ((userIn.readLine()).equalsIgnoreCase("QUIT")) {
-                sockOut.println("QUIT");
+                sockOut.print("QUIT\r\n");
                 sockOut.flush();
                 String closeConnect = sockIn.readLine();
                 System.out.println(closeConnect);
