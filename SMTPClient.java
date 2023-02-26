@@ -46,8 +46,6 @@ public class SMTPClient {
         String connected = sockIn.readLine();
         System.out.println(connected);
 
-        boolean moreContent = true;
-
         while (true) {
 
             // Collect info
@@ -138,8 +136,6 @@ public class SMTPClient {
                 String closeConnect = sockIn.readLine();
                 System.out.println(closeConnect);
                 break;
-            } else {
-                moreContent = true;
             }
         }
         sockOut.close();
