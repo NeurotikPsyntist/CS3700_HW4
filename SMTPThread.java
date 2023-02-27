@@ -35,6 +35,7 @@ public class SMTPThread extends Thread {
             while (true) {
 
                 String fromClient = cSockIn.readLine();
+                System.out.println(fromClient);
 
                 if (fromClient.equalsIgnoreCase("QUIT")) {
 
@@ -49,10 +50,10 @@ public class SMTPThread extends Thread {
 
                 // Receive & Verify HELO
                 String heloUser = fromClient;
+
                 while (true) {
 
                     if (heloUser.startsWith("HELO") && heloUser.length() > 5) {
-                        System.out.println(heloUser);
                         String[] parse = heloUser.split("\s");
                         String domain = parse[1];
                         String heloOk = "250 " + host + " hello " +
@@ -67,6 +68,7 @@ public class SMTPThread extends Thread {
                         cSockOut.print(heloErr);
                         cSockOut.flush();
                         heloUser = cSockIn.readLine();
+                        System.out.println(heloUser);
 
                     }
                 }
@@ -75,10 +77,10 @@ public class SMTPThread extends Thread {
                 while (true) {
 
                     String mailFrom = cSockIn.readLine();
+                    System.out.println(mailFrom);
 
                     if (mailFrom.startsWith("MAIL FROM:")) {
 
-                        System.out.println(mailFrom);
                         String senderOk = "250 2.1.0 Sender OK\r\n";
                         cSockOut.print(senderOk);
                         cSockOut.flush();
@@ -97,10 +99,10 @@ public class SMTPThread extends Thread {
                 while (true) {
 
                     String rcptTo = cSockIn.readLine();
+                    System.out.println(rcptTo);
 
                     if (rcptTo.startsWith("RCPT TO:")) {
 
-                        System.out.println(rcptTo);
                         String rcptOk = "250 2.1.5 Recipient OK\r\n";
                         cSockOut.print(rcptOk);
                         cSockOut.flush();
@@ -119,9 +121,9 @@ public class SMTPThread extends Thread {
                 while (true) {
 
                     String data = cSockIn.readLine();
+                    System.out.println(data);
 
                     if (data.startsWith("DATA")) {
-                        System.out.println(data);
                         String dataOk = "354 Start mail input; end with <CRLF>.<CRLF>\r\n";
                         cSockOut.print(dataOk);
                         cSockOut.flush();
@@ -140,7 +142,6 @@ public class SMTPThread extends Thread {
                 while (true) {
 
                     String msg = cSockIn.readLine();
-
                     System.out.println(msg);
 
                     if (msg.equals(".")) {
